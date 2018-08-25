@@ -7,8 +7,21 @@ const app = express()
 app.use(cors())
 
 let users = {
-  1: { id: '1', firstname: 'Maxime', lastname: 'Roma' },
-  2: { id: '2', firstname: 'Dave', lastname: 'Davids' }
+  1: { id: '1', firstname: 'Maxime', lastname: 'Roma', messageIds: [1] },
+  2: { id: '2', firstname: 'Dave', lastname: 'Davids', messageIds: [2] }
+}
+
+let messages = {
+  1: {
+    id: '1',
+    text: 'Hello World',
+    userId: '2'
+  },
+  2: {
+    id: '2',
+    text: 'By World',
+    userId: '2'
+  }
 }
 
 const schema = gql`
@@ -16,12 +29,21 @@ const schema = gql`
     users: [User!]
     me: User
     user(id: ID!): User
+
+    messages: [Message!]
+    message(id: ID!): Message!
   }
   type User {
     id: ID!
     username: String!
     firstname: String!
     lastname: String!
+    message: [Message!]
+  }
+  type Message {
+    id: ID!
+    text: String!
+    user: User!
   }
 `
 const resolvers = {
@@ -34,11 +56,24 @@ const resolvers = {
     },
     user: (parent, { id }) => {
       return users[id]
-    }
+    },
+    messages: () => Object.values(messages),
+    message: (parent, { id }) => messages[id]
   },
 
   User: {
-    username: user => `${user.firstname} ${user.lastname}`
+    username: user => `${user.firstname} ${user.lastname}`,
+    message: user => {
+      return Object.values(messages).filter(
+        message => message.userId === user.id
+      )
+    }
+  },
+
+  Message: {
+    user: message => {
+      return users[message.userId]
+    }
   }
 }
 
