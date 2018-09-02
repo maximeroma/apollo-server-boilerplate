@@ -10,8 +10,6 @@ export default gql`
   type User {
     id: ID!
     username: String!
-    firstname: String!
-    lastname: String!
-    message: [Message!]
+    messages: [Message!]
   }
 `

@@ -7,30 +7,56 @@ import resolvers from './resolvers'
 import models, { sequelize } from './models'
 
 const app = express()
-console.log('hello1', process.env.DATABASE)
+const eraseDatabaseOnSync = true
 app.use(cors())
 
 const server = new ApolloServer({
   typeDefs: schemas,
   resolvers,
-  context: {
+  context: async () => ({
     models,
-    me: models.users
-  }
+    me: await models.User.findByLogin('rwieruch')
+  })
 })
 
 server.applyMiddleware({ app, path: '/graphql' })
 
-sequelize
-  .sync()
-  //   // .sync({ force: true })
-  //   // .authenticate()
-  //   // .then(() => {
-  //   //   console.log('Connection has been established successfully.')
-  //   // })
-  //   // .catch(err => {
-  //   //   console.error('Unable to connect to the database:', err)
-  //   // })
-  .then(async () => {
-    app.listen({ port: 8000 }, () => console.log('Apollo server on port 8000'))
-  })
+sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
+  if (eraseDatabaseOnSync) {
+    createUserWithMessages()
+  }
+  app.listen({ port: 8000 }, () => console.log('Apollo server on port 8000'))
+})
+
+const createUserWithMessages = async () => {
+  await models.User.create(
+    {
+      username: 'rwieruch',
+      messages: [
+        {
+          text: 'Published the Road to learn React'
+        }
+      ]
+    },
+    {
+      include: [models.Message]
+    }
+  )
+
+  await models.User.create(
+    {
+      username: 'ddavids',
+      messages: [
+        {
+          text: 'Happy to release ...'
+        },
+        {
+          text: 'Published a complete ...'
+        }
+      ]
+    },
+    {
+      include: [models.Message]
+    }
+  )
+}
