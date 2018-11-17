@@ -20,6 +20,7 @@
     "graphql": "^0.13.2",
     "graphql-resolvers": "^0.2.2",
     "jsonwebtoken": "^8.3.0",
+    "knex": "^0.15.2",
     "pg": "^7.4.3",
     "sequelize": "^4.38.0",
     "uuid": "^3.3.2"

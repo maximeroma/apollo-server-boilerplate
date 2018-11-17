@@ -1,6 +1,6 @@
 import { ForbiddenError } from 'apollo-server'
 import { combineResolvers } from 'graphql-resolvers'
-import { isAuthenticated , isMessageOwner} from './authorization'
+import { isAuthenticated, isMessageOwner } from './authorization'
 
 export default {
   Query: {
@@ -33,9 +33,10 @@ export default {
       isAuthenticated,
       isMessageOwner,
       async (parent, { id }, { models }) => {
-      return await models.Message.destroy({ where: { id } })
-    }
-  ),
+        return await models.Message.destroy({ where: { id } })
+      }
+    )
+  },
 
   Message: {
     user: async (message, args, { models }) => {

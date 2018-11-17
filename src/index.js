@@ -27,9 +27,8 @@ const server = new ApolloServer({
   typeDefs: schemas,
   resolvers,
   formatError: error => {
-    const message = error.message
-      .replace('SequelizeValidationError: ', '')
-      .replace('Validation error: ', '')
+    const message = error.message.replace('SequelizeValidationError: ', '')
+    // .replace('Validation error: ', '')
 
     return {
       ...error,
@@ -78,6 +77,7 @@ const createUserWithMessages = async () => {
       username: 'ddavids',
       email: 'hello@david.com',
       password: 'ddavids',
+      role: 'ADMIN',
       messages: [
         {
           text: 'Happy to release ...'
