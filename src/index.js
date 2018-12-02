@@ -3,6 +3,7 @@ import 'dotenv/config'
 import cors from 'cors'
 import { ApolloServer, AuthenticationError } from 'apollo-server-express'
 import jwt from 'jsonwebtoken'
+import http from 'http'
 import schemas from './schemas'
 import resolvers from './resolvers'
 import models, { sequelize } from './models'
@@ -35,23 +36,32 @@ const server = new ApolloServer({
       message
     }
   },
-  context: async ({ req }) => {
-    const me = await getMe(req)
-    return {
-      models,
-      me,
-      secret: process.env.SECRET
+  context: async ({ req, connection }) => {
+    if (connection) {
+      return { models }
+    }
+    if (req) {
+      const me = await getMe(req)
+      return {
+        models,
+        me,
+        secret: process.env.SECRET
+      }
     }
   }
 })
 
 server.applyMiddleware({ app, path: '/graphql' })
+const httpServer = http.createServer(app)
+server.installSubscriptionHandlers(httpServer)
 
 sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
   if (eraseDatabaseOnSync) {
     createUserWithMessages(new Date())
   }
-  app.listen({ port: 8000 }, () => console.log('Apollo server on port 8000'))
+  httpServer.listen({ port: 8000 }, () =>
+    console.log('Apollo server on port 8000')
+  )
 })
 
 const createUserWithMessages = async date => {
